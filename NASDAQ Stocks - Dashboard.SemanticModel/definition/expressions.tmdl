@@ -1,0 +1,43 @@
+expression 'Arquivo de Amostra' =
+		let
+		    Fonte = Folder.Files("C:\Users\Thiago\Projetos\nasdaq-stocks\stocks"),
+		    Navegação1 = Fonte{0}[Content]
+		in
+		    Navegação1
+	lineageTag: aabc0bbd-b415-4e98-98e0-aadb7bfb89eb
+	queryGroup: 'Transformar Arquivo de stocks\Consultas Auxiliares'
+
+	annotation PBI_ResultType = Binary
+
+expression Parâmetro1 = #"Arquivo de Amostra" meta [IsParameterQuery=true, BinaryIdentifier=#"Arquivo de Amostra", Type="Binary", IsParameterQueryRequired=true]
+	lineageTag: c9c0ae42-5270-43ce-bdae-8d76eb07813d
+	queryGroup: 'Transformar Arquivo de stocks\Consultas Auxiliares'
+
+	annotation PBI_ResultType = Binary
+
+expression 'Transformar o Arquivo de Exemplo' =
+		let
+		    Fonte = Csv.Document(Parâmetro1,[Delimiter=",", Columns=6, Encoding=1252, QuoteStyle=QuoteStyle.None]),
+		    #"Cabeçalhos Promovidos" = Table.PromoteHeaders(Fonte, [PromoteAllScalars=true])
+		in
+		    #"Cabeçalhos Promovidos"
+	lineageTag: 14ef11e1-7f56-4f81-b5f7-f10b753509d4
+	queryGroup: 'Transformar Arquivo de stocks'
+
+	annotation PBI_ResultType = Table
+
+expression 'Transformar Arquivo' =
+		let
+		    Fonte = (Parâmetro1) => let
+		        Fonte = Csv.Document(Parâmetro1,[Delimiter=",", Columns=6, Encoding=1252, QuoteStyle=QuoteStyle.None]),
+		        #"Cabeçalhos Promovidos" = Table.PromoteHeaders(Fonte, [PromoteAllScalars=true])
+		    in
+		        #"Cabeçalhos Promovidos"
+		in
+		    Fonte
+	mAttributes: [ FunctionQueryBinding = "{""exemplarFormulaName"":""Transformar o Arquivo de Exemplo""}" ]
+	lineageTag: f4f307eb-5191-4d9e-8f88-6bf56de5278a
+	queryGroup: 'Transformar Arquivo de stocks\Consultas Auxiliares'
+
+	annotation PBI_ResultType = Function
+

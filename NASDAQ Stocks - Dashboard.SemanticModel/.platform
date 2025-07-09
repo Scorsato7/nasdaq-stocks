@@ -1,0 +1,11 @@
+{
+  "$schema": "https://developer.microsoft.com/json-schemas/fabric/gitIntegration/platformProperties/2.0.0/schema.json",
+  "metadata": {
+    "type": "SemanticModel",
+    "displayName": "NASDAQ Stocks - Dashboard"
+  },
+  "config": {
+    "version": "2.0",
+    "logicalId": "99d54acb-36ec-453b-9476-92caf12c666d"
+  }
+}

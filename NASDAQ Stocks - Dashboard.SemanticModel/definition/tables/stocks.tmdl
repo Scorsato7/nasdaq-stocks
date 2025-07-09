@@ -1,0 +1,121 @@
+table stocks
+	lineageTag: 77a25f2b-6a1c-41dc-a08f-100c29b2b1b1
+
+	column Ticker
+		dataType: string
+		lineageTag: 5f882bb3-a347-4573-a42d-8c9f15982f7d
+		summarizeBy: none
+		sourceColumn: Ticker
+
+		annotation SummarizationSetBy = Automatic
+
+	column Segmento
+		dataType: string
+		lineageTag: 41e0d411-56cd-4cd6-b87d-326e069112e9
+		summarizeBy: none
+		sourceColumn: Segmento
+
+		annotation SummarizationSetBy = Automatic
+
+	column Data
+		dataType: dateTime
+		formatString: Long Date
+		lineageTag: 2017c856-737b-4f29-9cea-0336766da82f
+		summarizeBy: none
+		sourceColumn: Data
+
+		variation Variation
+			isDefault
+			relationship: 58814404-70d8-4b9f-914c-2937070a371a
+			defaultHierarchy: LocalDateTable_b4ef6b9f-6c95-4110-831a-730e574710f8.'Hierarquia de datas'
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation UnderlyingDateTimeDataType = Date
+
+	column Abertura
+		dataType: decimal
+		formatString: "R$"\ #,0.###############;-"R$"\ #,0.###############;"R$"\ #,0.###############
+		lineageTag: 5d18c420-7fd1-4519-afd2-8fd8ddd42b53
+		summarizeBy: sum
+		sourceColumn: Abertura
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"currencyCulture":"pt-BR"}
+
+	column Fechamento
+		dataType: decimal
+		formatString: "R$"\ #,0.###############;-"R$"\ #,0.###############;"R$"\ #,0.###############
+		lineageTag: 717c7d9d-d53b-4408-a2e0-8f1ab78ef580
+		summarizeBy: sum
+		sourceColumn: Fechamento
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"currencyCulture":"pt-BR"}
+
+	column Máxima
+		dataType: decimal
+		formatString: "R$"\ #,0.###############;-"R$"\ #,0.###############;"R$"\ #,0.###############
+		lineageTag: 4b290b2c-e593-4dbb-807b-eb4f9bd8125e
+		summarizeBy: sum
+		sourceColumn: Máxima
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"currencyCulture":"pt-BR"}
+
+	column Mínima
+		dataType: decimal
+		formatString: "R$"\ #,0.###############;-"R$"\ #,0.###############;"R$"\ #,0.###############
+		lineageTag: 71d2c7ed-bf5b-4881-b60c-d1384ecdd8ed
+		summarizeBy: sum
+		sourceColumn: Mínima
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"currencyCulture":"pt-BR"}
+
+	column Volume
+		dataType: int64
+		formatString: 0
+		lineageTag: c4c00d60-4bde-4dd2-8068-519eae7a732a
+		summarizeBy: sum
+		sourceColumn: Volume
+
+		annotation SummarizationSetBy = Automatic
+
+	partition stocks = m
+		mode: import
+		source =
+				let
+				    Fonte = Folder.Files("C:\Users\Thiago\Projetos\nasdaq-stocks\stocks"),
+				    #"Arquivos Ocultos Filtrados1" = Table.SelectRows(Fonte, each [Attributes]?[Hidden]? <> true),
+				    #"Invocar Função Personalizada1" = Table.AddColumn(#"Arquivos Ocultos Filtrados1", "Transformar Arquivo", each #"Transformar Arquivo"([Content])),
+				    #"Colunas Renomeadas1" = Table.RenameColumns(#"Invocar Função Personalizada1", {"Name", "Nome da Origem"}),
+				    #"Outras Colunas Removidas1" = Table.SelectColumns(#"Colunas Renomeadas1", {"Nome da Origem", "Transformar Arquivo"}),
+				    #"Coluna de Tabela Expandida1" = Table.ExpandTableColumn(#"Outras Colunas Removidas1", "Transformar Arquivo", Table.ColumnNames(#"Transformar Arquivo"(#"Arquivo de Amostra"))),
+				    #"Tipo Alterado" = Table.TransformColumnTypes(#"Coluna de Tabela Expandida1",{{"Nome da Origem", type text}, {"Date", type text}, {"Close/Last", type text}, {"Volume", Int64.Type}, {"Open", type text}, {"High", type text}, {"Low", type text}}),
+				    #"Valor Substituído" = Table.ReplaceValue(#"Tipo Alterado",".csv","",Replacer.ReplaceText,{"Nome da Origem"}),
+				    #"Tipo Alterado com Localidade" = Table.TransformColumnTypes(#"Valor Substituído", {{"Date", type date}}, "en-US"),
+				    #"Colunas Renomeadas" = Table.RenameColumns(#"Tipo Alterado com Localidade",{{"Nome da Origem", "Ticker"}, {"Date", "Data"}, {"Close/Last", "Fechamento"}, {"Open", "Abertura"}, {"High", "Máxima"}, {"Low", "Mínima"}}),
+				    #"Valor Substituído1" = Table.ReplaceValue(#"Colunas Renomeadas","$","",Replacer.ReplaceText,{"Fechamento"}),
+				    #"Tipo Alterado com Localidade1" = Table.TransformColumnTypes(#"Valor Substituído1", {{"Fechamento", Currency.Type}}, "en-US"),
+				    #"Valor Substituído2" = Table.ReplaceValue(#"Tipo Alterado com Localidade1","$","",Replacer.ReplaceText,{"Abertura"}),
+				    #"Valor Substituído3" = Table.ReplaceValue(#"Valor Substituído2","$","",Replacer.ReplaceText,{"Máxima"}),
+				    #"Valor Substituído4" = Table.ReplaceValue(#"Valor Substituído3","$","",Replacer.ReplaceText,{"Mínima"}),
+				    #"Tipo Alterado com Localidade2" = Table.TransformColumnTypes(#"Valor Substituído4", {{"Abertura", Currency.Type}}, "en-US"),
+				    #"Tipo Alterado com Localidade3" = Table.TransformColumnTypes(#"Tipo Alterado com Localidade2", {{"Máxima", Currency.Type}}, "en-US"),
+				    #"Tipo Alterado com Localidade4" = Table.TransformColumnTypes(#"Tipo Alterado com Localidade3", {{"Mínima", Currency.Type}}, "en-US"),
+				    #"Consultas Mescladas" = Table.NestedJoin(#"Tipo Alterado com Localidade4", {"Ticker"}, segment, {"Ticker"}, "segment", JoinKind.LeftOuter),
+				    #"segment Expandido" = Table.ExpandTableColumn(#"Consultas Mescladas", "segment", {"Segmento"}, {"segment.Segmento"}),
+				    #"Colunas Renomeadas2" = Table.RenameColumns(#"segment Expandido",{{"segment.Segmento", "Segmento"}}),
+				    #"Colunas Reordenadas" = Table.ReorderColumns(#"Colunas Renomeadas2",{"Ticker", "Segmento", "Data", "Abertura", "Fechamento", "Máxima", "Mínima", "Volume"})
+				in
+				    #"Colunas Reordenadas"
+
+	annotation PBI_NavigationStepName = Navegação
+
+	annotation PBI_ResultType = Table
+

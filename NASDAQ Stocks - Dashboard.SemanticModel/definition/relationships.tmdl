@@ -1,0 +1,9 @@
+relationship 58814404-70d8-4b9f-914c-2937070a371a
+	joinOnDateBehavior: datePartOnly
+	fromColumn: stocks.Data
+	toColumn: LocalDateTable_b4ef6b9f-6c95-4110-831a-730e574710f8.Date
+
+relationship AutoDetected_d3e89f65-f024-4ab7-bbd7-5dada78362d9
+	fromColumn: stocks.Ticker
+	toColumn: segment.Ticker
+
